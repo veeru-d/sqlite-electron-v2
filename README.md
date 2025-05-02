@@ -1,4 +1,5 @@
-# Using @capacitor-community/sqlite plugin in electron app with latest versions of ionic, angular and capacitor
+# Using @capacitor-community/sqlite plugin in electron app with latest versions of ionic, angular and capacitor. With encryption and without it.
+# ***`database is not a file` while opening encrypted sqlite data base***
 
 ## TLDR
 `@capacitor-community/sqlite`:
@@ -10,8 +11,8 @@
   - electron - ERROR `database is not a file`
 
 ## Info on the app
-This is a **DEMO** app based on **latest** versions of ionic, angular, capacitor app with android and electron platforms. sqlite support uses @capacitor-community/sqlite plugin.</br>
-I have another production app with **older** versions of ionic, angular, capacitor with android and electron platforms **working fine** with **encrypted** sqlite databases. sqlite support uses older verion of @capacitor-community/sqlite plugin.
+This is a **DEMO** app based on **latest** versions of `ionic, angular, capacitor` app with android and electron platforms. Uses latest `@capacitor-community/sqlite` plugin.</br></br>
+I have another production app with **older** versions of `ionic, angular, capacitor` with android and electron platforms **working fine** with **encrypted** sqlite databases. Uses older verion of `@capacitor-community/sqlite` plugin.
 
 ## Added Electron platform
 [Ref](https://github.com/capacitor-community/sqlite)
@@ -94,7 +95,7 @@ ERROR Error: "CapacitorSQLite" plugin is not implemented on electron
 ```
 
 ## fixing electron app
-[Ref](https://github.com/capacitor-community/sqlite/issues/636#issuecomment-2830123873)
+[Ref](https://github.com/capacitor-community/sqlite/issues/636#issuecomment-2830123873)</br>
 Changed `electron/node_modules/@capacitor-community/sqlite/electron/dist/plugin.js`
 ```
 CapacitorCommunitySqlite: CapacitorCommunitySqlite.default,
@@ -110,16 +111,16 @@ called ipcMain.handle: CapacitorSQLite-open
 [32688:0428/125048.742:ERROR:crashpad_client_win.cc(844)] not connected
 ```
 
-[Ref](https://github.com/capacitor-community/sqlite/issues/636#issuecomment-2837930986)
+[Ref](https://github.com/capacitor-community/sqlite/issues/636#issuecomment-2837930986)</br>
 Followed the above ref
 - uninstalled `@electron/rebuild`
-- installed `node-fetch@^2.7.0, electron@^26.6.10, electron-builder@^23.6.0, electron/rebuild@^3.2.9,
+- installed `node-fetch@^2.7.0, electron@^26.6.10, electron-builder@^23.6.0, electron/rebuild@^3.2.9`
 
 Also, the following changes are needed:
-1. in `electron/node_modules/builder-util-runtime/out/httpExecutor.d.ts:`
-change `[key: string]: string;` to `[key: string]: any;
+1. in `electron/node_modules/builder-util-runtime/out/httpExecutor.d.ts:`</br
+change `[key: string]: string;` to `[key: string]: any;`
 
-2. in `electron/node_modules/chokidar/types/index.d.ts`:
+2. in `electron/node_modules/chokidar/types/index.d.ts`:</br>
 add this after `close()`:
 ```
 ref(): this;
@@ -167,8 +168,8 @@ Close the app and relaunch it (it's not needed, but to simulate an app that read
 npm run electron:start
 ```
 
-click "READ ENCRYPTED DATA" button
-**ERROR**
+click "READ ENCRYPTED DATA" button</br>
+**ERROR**</br>
 cmd-line error:
 ```
 ...
@@ -188,5 +189,5 @@ ERROR Error: Error invoking remote method 'CapacitorSQLite-open': Error: Open: E
 ```
 
 ## Open the encrypted database
-the encrypted db created can be opened using `DB Browser (SQLCipher)` app without any issue</br>
+the encrypted db created above can be opened using `DB Browser (SQLCipher)` app without any issue</br>
 And, it has the expected table & row. Need to provide passphrase to open the db but it works.
