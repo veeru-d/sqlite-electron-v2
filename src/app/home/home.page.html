@@ -13,8 +13,12 @@
     </ion-toolbar>
   </ion-header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <div>
+    <ion-button (click)="createUnencryptedData()">Create Unencrypted Data</ion-button>
+    <ion-button (click)="readUnencryptedData()">Read Unencrypted Data</ion-button>
+  </div>
+  <div>
+    <ion-button (click)="createEncryptedData()">Create Encrypted Data</ion-button>
+    <ion-button (click)="readEncryptedData()">Read Encrypted Data</ion-button>
   </div>
 </ion-content>

@@ -6,7 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'www',
   plugins: {
     CapacitorSQLite: {
-      electronWindowsLocation: 'C:\\Users\\veera',
+      electronIsEncryption: true,
+      electronWindowsLocation: 'C:\\Users\\Public',
     },
   },
 };

@@ -1,131 +1,19 @@
 # Using @capacitor-community/sqlite plugin in electron app with latest versions of ionic, angular and capacitor
 
 ## TLDR
-`@capacitor-community/sqlite` works in `android` but throws `"CapacitorSQLite" plugin is not implemented on electron` error in `electron`.
+`@capacitor-community/sqlite`:
+- unencrypted database:
+  - android - WORKS
+  - electron - WORKS
+- encrypted database:
+  - android - WORKS
+  - electron - ERROR `database is not a file`
 
+## Info on the app
+This is a **DEMO** app based on **latest** versions of ionic, angular, capacitor app with android and electron platforms. sqlite support uses @capacitor-community/sqlite plugin.</br>
+I have another production app with **older** versions of ionic, angular, capacitor with android and electron platforms **working fine** with **encrypted** sqlite databases. sqlite support uses older verion of @capacitor-community/sqlite plugin.
 
-## Create basic ionic app
-```
-ionic start sqlite-electron blank --type=angular-standalone --capacitor
-
-ionic serve
-```
-<p>App works successfully in browser</p>
-
-## Add Android platform
-```
-npm install @capacitor/android
-```
-
-```
-npx cap add android
-√ Adding native android project in android in 63.39ms
-√ add in 64.02ms
-√ Copying web assets from www to android\app\src\main\assets\public in 12.26ms
-√ Creating capacitor.config.json in android\app\src\main\assets in 666.20μs
-√ copy android in 30.47ms
-√ Updating Android plugins in 4.49ms
-[info] Found 4 Capacitor plugins for android:
-       @capacitor/app@7.0.1
-       @capacitor/haptics@7.0.1
-       @capacitor/keyboard@7.0.1
-       @capacitor/status-bar@7.0.1
-√ update android in 189.33ms
-√ Syncing Gradle in 370.50μs
-[success] android platform added!
-Follow the Developer Workflow guide to get building:
-https://capacitorjs.com/docs/basics/workflow
-```
-
-```
-npx cap run android
-```
-<p>App works successfully in android emulator based on API version 35</p>
-
-## Add sqlite to android
-`npm i @capacitor-community/sqlite`
-
-`npx cap sync android`
-```
-√ Copying web assets from www to android\app\src\main\assets\public in 33.43ms
-√ Creating capacitor.config.json in android\app\src\main\assets in 893.20μs
-√ copy android in 55.11ms
-√ Updating Android plugins in 4.94ms
-[info] Found 5 Capacitor plugins for android:
-       @capacitor-community/sqlite@7.0.0
-       @capacitor/app@7.0.1
-       @capacitor/haptics@7.0.1
-       @capacitor/keyboard@7.0.1
-       @capacitor/status-bar@7.0.1
-√ update android in 248.07ms
-[info] Sync finished in 0.35s
-```
-
-### Create table and insert rows
-**`home.page.ts:`**
-```
-import { Component, OnInit } from '@angular/core';
-import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-} from '@ionic/angular/standalone';
-import { CapacitorSQLite, SQLiteConnection } from '@capacitor-community/sqlite';
-
-@Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent],
-})
-export class HomePage implements OnInit {
-  async ngOnInit() {
-    const sqlite = new SQLiteConnection(CapacitorSQLite);
-    console.log('sqlite=', JSON.stringify(sqlite));
-
-    const db = await sqlite.createConnection(
-      'todo',
-      false,
-      'no-encryption',
-      0,
-      false
-    );
-    console.log('db=', JSON.stringify(db));
-
-    await db.open();
-
-    const createTable = await db.execute(`
-      CREATE TABLE IF NOT EXISTS todos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        completed INTEGER DEFAULT 0
-      );`);
-    console.log('createTable=', JSON.stringify(createTable));
-
-    const addTodo = await db.run(
-      'INSERT INTO todos (title, completed) VALUES (?, ?);',
-      [`test todo ${Math.round(Math.random() * 1000)}`, 0]
-    );
-    console.log('addTodo=', JSON.stringify(addTodo));
-
-    await db.close();
-    await sqlite.closeConnection('todo', false);
-  }
-}
-```
-
-`npm run build --configuration=development`
-
-`npx cap sync android`
-
-`npx cap run android`
-<p>
-  DB /data/data/io.ionic.starter/databases/todoSQLite.db created successfully.
-  DB contains the expected table & row.
-</p>
-
-## Add Electron platform
+## Added Electron platform
 [Ref](https://github.com/capacitor-community/sqlite)
 
 **`capacitor.config.ts:`**
@@ -138,7 +26,8 @@ const config: CapacitorConfig = {
   webDir: 'www',
   plugins: {
     CapacitorSQLite: {
-      electronWindowsLocation: 'C:\\Users\\veera',
+      electronIsEncryption: true,
+      electronWindowsLocation: 'C:\\Users\\Public',
     },
   },
 };
@@ -146,90 +35,13 @@ const config: CapacitorConfig = {
 export default config;
 ```
 
-[Ref](https://capacitor-community.github.io/electron/docs/gettingstarted)
-
-`npm i @capacitor-community/electron`
-
-`npx cap add @capacitor-community/electron`
-Creates `electron` folder successfully.
-
-output of above cmd:
 ```
-ℹ Adding Electron platform: start �
-ℹ Adding Electron platform: extracting template
-ℹ Adding Electron platform: copying capacitor config file
-ℹ Adding Electron platform: setting up electron project
-ℹ Adding Electron platform: installing npm modules
-✔ Adding Electron platform: completed in 22.67s
-ℹ Copying Web App to Electron platform: start �
-ℹ Copying Web App to Electron platform: Copying D:\sqlite-electron\www into D:\sqlite-electron\electron\app
-✔ Copying Web App to Electron platform: completed in 34.24ms
-ℹ Updating Electron plugins: start �
-⠋ Updating Electron plugins: searching for plugins
-Unable to find node_modules/eslint-plugin-jsdoc.
-Are you sure eslint-plugin-jsdoc is installed?
-ℹ Updating Electron plugins: searching for plugins
-ℹ Updating Electron plugins: generating electron-plugins.js
-⠋ Updating Electron plugins: installing electron plugin files
-
-Will install: @capacitor-community/sqlite@7.0.0
-
-ℹ Updating Electron plugins: installing electron plugin files
-✔ Updating Electron plugins: completed in 4.02s
+npm i @capacitor-community/electron
+npx cap add @capacitor-community/electron
+npx cap sync @capacitor-community/electron
 ```
 
-**not sure about `Unable to find node_modules/eslint-plugin-jsdoc` issue above**
-
-```
-npx cap open @capacitor-community/electron
-```
-**DOES NOT WORK**
-
-```
-ℹ Opening Electron platform: start �
-ℹ Opening Electron platform: building electron app
-⠹ Opening Electron platform: running electron appError: undefined
-✖ Opening Electron platform:
-node:internal/process/promises:392
-      new UnhandledPromiseRejection(reason);
-      ^
-
-UnhandledPromiseRejection: This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). The promise rejected with the reason "
-> sqlite-electron@1.0.0 electron:start-live
-> node ./live-runner.js
-
-node:internal/child_process:420
-    throw new ErrnoException(err, 'spawn');
-          ^
-
-Error: spawn EINVAL
-    at ChildProcess.spawn (node:internal/child_process:420:11)
-    at Object.spawn (node:child_process:753:9)
-    at D:\sqlite-electron\electron\live-runner.js:19:24
-    at new Promise (<anonymous>)
-    at runBuild (D:\sqlite-electron\electron\live-runner.js:18:10)
-    at D:\sqlite-electron\electron\live-runner.js:72:9
-    at Object.<anonymous> (D:\sqlite-electron\electron\live-runner.js:75:3)
-    at Module._compile (node:internal/modules/cjs/loader:1562:14)
-    at Object..js (node:internal/modules/cjs/loader:1699:10)
-    at Module.load (node:internal/modules/cjs/loader:1313:32) {
-  errno: -4071,
-  code: 'EINVAL',
-  syscall: 'spawn'
-}
-
-Node.js v22.13.0
-".
-    at throwUnhandledRejectionsMode (node:internal/process/promises:392:7)
-    at processPromiseRejections (node:internal/process/promises:475:17)
-    at process.processTicksAndRejections (node:internal/process/task_queues:106:32) {
-  code: 'ERR_UNHANDLED_REJECTION'
-}
-
-Node.js v22.13.0
-```
-
-So, tried the following based on [Ref](https://github.com/capacitor-community/sqlite)
+[Ref](https://github.com/capacitor-community/sqlite)
 ```
 cd electron
 npm install --save better-sqlite3-multiple-ciphers
@@ -248,90 +60,25 @@ npm install --save-dev @electron/rebuild
 npm install --save-dev electron-builder@24.6.4
 ```
 
-Added this to `electron/tsconfig.json`:
+`electron/tsconfig.json`:
 ```
 "skipLibCheck": true
 ```
 
-Run the app
+Build app
 ```
 cd <root>
-npx cap open @capacitor-community/electron
-```
-**DOES NOT WORK**
-```
-ℹ Opening Electron platform: start �
-ℹ Opening Electron platform: building electron app
-⠼ Opening Electron platform: running electron appError: undefined
-✖ Opening Electron platform:
-node:internal/process/promises:392
-      new UnhandledPromiseRejection(reason);
-      ^
-
-UnhandledPromiseRejection: This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). The promise rejected with the reason "
-> sqlite-electron@1.0.0 electron:start-live
-> node ./live-runner.js
-
-node:internal/child_process:420
-    throw new ErrnoException(err, 'spawn');
-          ^
-
-Error: spawn EINVAL
-    at ChildProcess.spawn (node:internal/child_process:420:11)
-    at Object.spawn (node:child_process:753:9)
-    at D:\sqlite-electron\electron\live-runner.js:19:24
-    at new Promise (<anonymous>)
-    at runBuild (D:\sqlite-electron\electron\live-runner.js:18:10)
-    at D:\sqlite-electron\electron\live-runner.js:72:9
-    at Object.<anonymous> (D:\sqlite-electron\electron\live-runner.js:75:3)
-    at Module._compile (node:internal/modules/cjs/loader:1562:14)
-    at Object..js (node:internal/modules/cjs/loader:1699:10)
-    at Module.load (node:internal/modules/cjs/loader:1313:32) {
-  errno: -4071,
-  code: 'EINVAL',
-  syscall: 'spawn'
-}
-
-Node.js v22.13.0
-".
-    at throwUnhandledRejectionsMode (node:internal/process/promises:392:7)
-    at processPromiseRejections (node:internal/process/promises:475:17)
-    at process.processTicksAndRejections (node:internal/process/task_queues:106:32) {
-  code: 'ERR_UNHANDLED_REJECTION'
-}
-
-Node.js v22.13.0
+npm run build --configuration=development
 ```
 
-## Alternate way tried to run the electron project
-`cd electron`
-
-`npm run electron:start`
+Run electron app in windows:
+```
+cd electron
+npm run electron:start
+```
 
 **DOES NOT WORK**
 
-cmd-line error:
-```
-> sqlite-electron@1.0.0 electron:start
-> npm run build && electron --inspect=5858 ./
-
-> sqlite-electron@1.0.0 build
-> tsc && electron-rebuild
-
-✔ Rebuild Complete
-
-Debugger listening on ws://127.0.0.1:5858/5b02afc7-0b16-4b8b-af40-17ffd48f71bb
-For help, see: https://nodejs.org/en/docs/inspector
-in setupCapacitorElectronPlugins
-{
-  CapacitorCommunitySqlite: { default: { CapacitorSQLite: [class CapacitorSQLite] } }
-}
-CapacitorCommunitySqlite
-Skip checkForUpdates because application is not packed and dev update config is not forced
-checkForUpdatesAndNotify called, downloadPromise is null
-```
-
-electron dev tools console logs
 ```
 ERROR Error: "CapacitorSQLite" plugin is not implemented on electron
     at B (chunk-XR2CIPKH.js:1:1374)
@@ -346,9 +93,100 @@ ERROR Error: "CapacitorSQLite" plugin is not implemented on electron
     at f.invokeTask (polyfills-4BK4MXU4.js:1:7057)
 ```
 
-So, in summary, android app works as expected.
+## fixing electron app
+[Ref](https://github.com/capacitor-community/sqlite/issues/636#issuecomment-2830123873)
+Changed `electron/node_modules/@capacitor-community/sqlite/electron/dist/plugin.js`
+```
+CapacitorCommunitySqlite: CapacitorCommunitySqlite.default,
+```
 
-Electron app launches and displays the home page, but throws this error in dev tools console tab.
+with this the following error was thrown
 ```
-"CapacitorSQLite" plugin is not implemented on electron
+npm run electron:start
+...
+called ipcMain.handle: CapacitorSQLite-createConnection
+&&& Databases path: C:\Users\Public\sqlite-electron\todoencSQLite.db
+called ipcMain.handle: CapacitorSQLite-open
+[32688:0428/125048.742:ERROR:crashpad_client_win.cc(844)] not connected
 ```
+
+[Ref](https://github.com/capacitor-community/sqlite/issues/636#issuecomment-2837930986)
+Followed the above ref
+- uninstalled `@electron/rebuild`
+- installed `node-fetch@^2.7.0, electron@^26.6.10, electron-builder@^23.6.0, electron/rebuild@^3.2.9,
+
+Also, the following changes are needed:
+1. in `electron/node_modules/builder-util-runtime/out/httpExecutor.d.ts:`
+change `[key: string]: string;` to `[key: string]: any;
+
+2. in `electron/node_modules/chokidar/types/index.d.ts`:
+add this after `close()`:
+```
+ref(): this;
+unref(): this;
+```
+
+With this, I'm able to successfully build, run the electron app and create and read sqlite db **without** encryption
+
+## encrypted database
+Creating encrypted database is working fine.</br>
+However, if I try to open an existing encrypted database, I get error:
+
+```
+cd <root>
+npm run build --configuration=development
+npx cap copy @capacitor-community/electron
+
+cd electron
+npm i
+```
+
+delete any dbs in `c:/users/public/sqlite-electron` and run electron app:
+```
+npm run electron:start
+```
+
+click "CREATE ENCRYPTED DATA" button</br>
+cmd-line message (no error):
+```
+...
+called ipcMain.handle: CapacitorSQLite-isSecretStored
+called ipcMain.handle: CapacitorSQLite-createConnection
+&&& Databases path: C:\Users\Public\sqlite-electron\todoencSQLite.db
+called ipcMain.handle: CapacitorSQLite-open
+called ipcMain.handle: CapacitorSQLite-execute
+$$$ in executeSQL journal_mode: delete $$$
+called ipcMain.handle: CapacitorSQLite-run
+$$$ in runSQL journal_mode: delete $$$
+called ipcMain.handle: CapacitorSQLite-close
+called ipcMain.handle: CapacitorSQLite-closeConnection
+```
+
+Close the app and relaunch it (it's not needed, but to simulate an app that reads pre-populated encrypted db)
+```
+npm run electron:start
+```
+
+click "READ ENCRYPTED DATA" button
+**ERROR**
+cmd-line error:
+```
+...
+called ipcMain.handle: CapacitorSQLite-isSecretStored
+called ipcMain.handle: CapacitorSQLite-createConnection
+&&& Databases path: C:\Users\Public\sqlite-electron\todoencSQLite.db
+called ipcMain.handle: CapacitorSQLite-open
+Error occurred in handler for 'CapacitorSQLite-open': Error: Open: Error: Open: Error: OpenOrCreateDatabase DbChanges:  file is not a database
+    at CapacitorSQLite.open (D:\ezeescore\sqlite-electron-github-v2\sqlite-electron-v2\electron\node_modules\@capacitor-community\sqlite\electron\dist\plugin.js:5371:20)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async WebContents.<anonymous> (node:electron/js2c/browser_init:2:89579)
+```
+
+dev tools error in console tab:
+```
+ERROR Error: Error invoking remote method 'CapacitorSQLite-open': Error: Open: Error: Open: Error: OpenOrCreateDatabase DbChanges:  file is not a database
+```
+
+## Open the encrypted database
+the encrypted db created can be opened using `DB Browser (SQLCipher)` app without any issue</br>
+And, it has the expected table & row. Need to provide passphrase to open the db but it works.
