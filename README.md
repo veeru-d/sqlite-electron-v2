@@ -1,5 +1,5 @@
 # Using @capacitor-community/sqlite plugin in electron app with latest versions of ionic, angular and capacitor. With encryption and without it.
-# ***`database is not a file` while opening encrypted sqlite data base***
+# ***`file is not a database` while opening encrypted sqlite data base***
 
 ## TLDR
 `@capacitor-community/sqlite`:
@@ -8,7 +8,7 @@
   - electron - WORKS
 - encrypted database:
   - android - WORKS
-  - electron - ERROR `database is not a file`
+  - electron - ERROR `file is not a database`
 
 ## Info on the app
 This is a **DEMO** app based on **latest** versions of `ionic, angular, capacitor` app with android and electron platforms. Uses latest `@capacitor-community/sqlite` plugin.</br></br>
